@@ -196,7 +196,7 @@ list
 
 ```{r}
 ### Dealing with missing values
-data <- na.omit(Customer_Segmentation)
+Customer_Segmentation <- na.omit(Customer_Segmentation)
 ```
 
 
