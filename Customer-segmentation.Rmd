@@ -1,0 +1,222 @@
+
+
+
+# Research Question
+
+
+# Problem Definition
+
+
+
+### Data description
+
+
+
+# Experimental design
+
+1. Problem Definition
+
+2. Data Sourcing
+
+3. Check the Data
+
+4. Perform Data Cleaning
+
+5. Perform Exploratory Data Analysis
+
+6. Implement the Solution
+
+
+
+
+```{r}
+library(readr)
+Customer_Segmentation <- read_csv("C:/Users/fiona/Desktop/project week 15 R/Customer_Segmentation.csv")
+View(Customer_Segmentation)
+```
+
+
+```{r}
+### Installing packages
+install.packages("psych")
+
+install.packages("Amelia")
+
+install.packages("vqv/ggbiplot")
+
+install.packages("gridExtra")
+
+install.packages("devtools")
+
+install.packages("GGally")
+
+install.packages("factoextra")
+
+```
+
+```{r}
+install.packages("ggbiplot")
+library(ggbiplot)
+```
+
+
+```{r}
+library(dplyr)
+library(magrittr)
+library(knitr)
+library(purrr)
+library(dplyr)
+library(psych)
+library(tidyverse)
+library(Amelia)
+library(ggplot2)
+library(corrplot)
+library(gridExtra)
+library(ggcorrplot)
+library(moments)
+library(devtools)
+library(cluster) 
+library(factoextra)
+library(GGally)
+```
+
+
+# Check the Data
+```{r}
+### Check the Data
+head(Customer_Segmentation)
+```
+
+
+```{r}
+### Getting the column names
+attributes(Customer_Segmentation)$names
+```
+
+
+
+```{r}
+### Getting the class ofthe data
+attributes(Customer_Segmentation)$class
+```
+
+
+
+
+```{r}
+### Taking a glimpse on some of the data in the dataframe
+glimpse(Customer_Segmentation)
+```
+
+
+
+```{r}
+### Checking some statistical summaries of the data
+summary(Customer_Segmentation)
+```
+
+
+
+```{r}
+### Checking for the dimensions of the dataframe
+dim(Customer_Segmentation)
+```
+Our data contains 18 columns and 12330  rows
+
+
+
+
+```{r}
+### Checking the number of unique columns
+cat.columns <- c("Edu","Years Employed")
+no <- function(x) {  
+    nlevels(x)
+  }
+  
+number <- sapply(select(Customer_Segmentation, cat.columns), no)
+number
+
+```
+From the specified columns we observe that not column has unique values
+
+
+
+```{r}
+### Summary of numeric columns
+
+
+Customer_Segmentation %>%
+  select_if(is.numeric) %>%
+  map(~summary(.))
+```
+
+
+
+```{r}
+describe(Customer_Segmentation)
+```
+
+
+
+
+
+
+# Perform Data Cleaning
+
+```{r}
+### Changing the names of the columns to lower
+
+colnames(Customer_Segmentation) <- tolower(str_replace_all(colnames(Customer_Segmentation), c(' ' = '_')))
+colnames(Customer_Segmentation)
+```
+
+
+
+```{r}
+### Checking for Missing values
+
+colSums(is.na(Customer_Segmentation))
+
+```
+
+
+
+
+
+```{r}
+### Sum for Missing values
+sum(is.na(Customer_Segmentation))
+```
+
+```{r}
+### list of  Missing values
+list <- colnames(Customer_Segmentation)[apply(Customer_Segmentation,2, anyNA)]
+list
+```
+
+```{r}
+### Dealing with missing values
+data <- na.omit(Customer_Segmentation)
+```
+
+
+```{r}
+### Dealing with missing values
+Customer_Segmentation[is.na(Customer_Segmentation)] <- 0
+```
+
+
+```{r}
+### Checking the data type ofeach column
+sapply(Customer_Segmentation, class)
+```
+
+
+```{r}
+### Checking for duplicates
+
+anyDuplicated(Customer_Segmentation)
+```
+
+
+
