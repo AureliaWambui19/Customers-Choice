@@ -1,0 +1,617 @@
+
+
+
+# Research Question
+
+Customers’ choice is a market research firm.  We have been approached by a client who is an automobile business owner. This client has tasked us to help identify different segments (groups) to which her customers belong. 
+
+# 1 Problem Definition
+
+Customer segmentation is the practice of partitioning a customer into groups of individuals that have similar characteristics. Our aim is to identify customers best suited for the clients’ automobile products.
+
+# 2 Data source and description
+
+Our data is about customers of a certain business and their characteristics and was sourced from Kaggle in the following link 
+https://www.kaggle.com/yashgupta011/customer-segmentation-dataset?select=Customer_Segmentation.csv
+The data has 850 rows and 10 columns.
+
+
+# Experimental design
+
+1. Problem Definition
+
+2. Data Sourcing
+
+3. Check the Data
+
+4. Perform Data Cleaning
+
+5. Perform Exploratory Data Analysis
+
+6. Implement the Solution
+
+7. Challenging the solution
+
+8. Recommendation
+
+
+
+# 3 Checking the data
+
+```{r}
+# Loading our dataset
+library(readr)
+Customer_Segmentation <- read_csv("C:/Users/mcmug/Desktop/Customer_Segmentation.csv")
+View(Customer_Segmentation)
+```
+
+
+```{r}
+### Installing packages
+#install.packages("psych")
+
+#install.packages("Amelia")
+
+#install.packages("vqv/ggbiplot")
+
+#install.packages("gridExtra")
+
+#install.packages("devtools")
+
+#install.packages("GGally")
+
+#install.packages("factoextra")
+
+```
+
+
+
+
+```{r}
+# loading libraries
+library(dplyr)
+library(magrittr)
+library(knitr)
+library(purrr)
+library(dplyr)
+library(psych)
+library(tidyverse)
+library(Amelia)
+library(ggplot2)
+library(corrplot)
+library(gridExtra)
+library(ggcorrplot)
+library(moments)
+library(devtools)
+library(cluster) 
+library(factoextra)
+library(GGally)
+```
+
+
+
+```{r}
+# previewing top of our dataset
+head(Customer_Segmentation)
+```
+
+
+```{r}
+# Getting the column names
+attributes(Customer_Segmentation)$names
+```
+
+
+
+```{r}
+# Getting the class ofthe data
+attributes(Customer_Segmentation)$class
+```
+
+
+
+
+```{r}
+# Taking a glimpse on some of the data in the dataset
+glimpse(Customer_Segmentation)
+```
+
+
+```{r}
+# Checking some statistical summaries of the data
+summary(Customer_Segmentation)
+```
+
+
+```{r}
+# Checking for the dimensions of the dataset
+dim(Customer_Segmentation)
+```
+Our data contains 10 columns and 850  rows
+
+
+
+
+
+
+# 4 Perform Data Cleaning
+
+## 4.1 Changing the names of the columns to lower case
+
+```{r}
+### Changing the names of the columns to lower
+
+colnames(Customer_Segmentation) <- tolower(str_replace_all(colnames(Customer_Segmentation), c(' ' = '_')))
+colnames(Customer_Segmentation)
+```
+
+## 4.2 Checking for Missing values
+
+```{r}
+### Checking for Missing values
+
+colSums(is.na(Customer_Segmentation))
+
+```
+
+
+
+
+```{r}
+#  visualizing missing data
+#install.packages("naniar")
+library(naniar)
+gg_miss_var(Customer_Segmentation)
+```
+there are 150 missing values in defaulted column
+
+
+
+```{r}
+#calculating percentage of missing data
+miss_var_summary(Customer_Segmentation)
+```
+
+defaulted has 17.64% missing values so we will drop it
+
+
+
+
+```{r}
+### Dealing with missing values
+data <- na.omit(Customer_Segmentation)
+```
+
+
+```{r}
+### verifying there are no missing values values
+gg_miss_var(data)
+```
+
+
+
+
+## 4.3 Checking for duplicates
+
+```{r}
+### Checking for duplicates
+
+anyDuplicated(data)
+```
+there are no duplicates
+
+## 4.4 Checking for outliers
+
+```{r}
+### Checking for outliers
+boxplot(data$other_debt)
+```
+```{r}
+boxplot(data$age)
+```
+
+
+```{r}
+boxplot(data$edu)
+```
+
+```{r}
+boxplot(data$years_employed)
+```
+```{r}
+boxplot(data$income)
+```
+```{r}
+boxplot(data$card_debt)
+```
+```{r}
+boxplot(data$debtincomeratio)
+```
+we noted some outliers but we didnt drop them because they might provide more insights as we do analysis
+
+# 5 EDA
+
+## 5.1 univariate
+
+
+```{r}
+# selecting numerical variables
+num<-data[,-c(1,9)]
+```
+
+
+```{r}
+# getting the modes of numerical variables
+Modes <- function(x) {
+  ux <- unique(x)
+  tab <- tabulate(match(x, ux))
+  ux[tab == max(tab)]
+}
+lapply(num, Modes)
+```
+
+
+
+```{r}
+# getting the standard deviation of numerical variables
+lapply(num, sd)
+```
+```{r}
+# getting the mean of  variables
+lapply(num, mean)
+```
+```{r}
+# getting the median of  variables
+lapply(num, median)
+```
+```{r}
+# getting the variance of  variables
+lapply(num, var)
+```
+```{r}
+# getting the minimum values of  variables
+lapply(num, min)
+```
+```{r}
+# getting the mean of  variables
+lapply(num, max)
+```
+
+```{r}
+# getting the range of  variables
+lapply(num, range)
+```
+```{r}
+# getting the kurtosis of  variables
+lapply(num, kurtosis)
+```
+```{r}
+# getting the skewness of  variables
+lapply(num, skewness)
+```
+
+
+```{r}
+
+# Plotting barplot 
+barplot(table(data$age),
+main = "Bargraph of ages",
+xlab = "ages",
+ylab = "Freq",
+col = topo.colors(20),
+horiz = FALSE)
+```
+the age of the youngest customer is 20 ,while the oldest is 56,most customers are 29 years old
+
+```{r}
+
+# Plotting barplot 
+barplot(table(data$edu),
+main = "Bargraph ofeducation levels",
+xlab = "education levels",
+ylab = "Freq",
+col = topo.colors(5),
+horiz = FALSE)
+```
+
+
+
+```{r}
+# Plotting barplot 
+barplot(table(data$years_employed),
+main = "Bargraph of years of employment",
+xlab = "employment years",
+ylab = "Freq",
+col = cm.colors(15),
+horiz = FALSE)
+```
+Most customers had less than one year of employment
+
+
+
+```{r}
+hist(data$debtincomeratio, 
+     main = "Histogram of debtincomeratio", 
+     xlab = "debtincomeratio", col = "orange")
+```
+The histogram is positively skewed meaning most customers have a low debt income ratio
+
+```{r}
+
+hist(data$income, 
+     main = "Histogram of income", 
+     xlab = "income", col = "orange")
+```
+the histogram is positively skewed meaning most customers  have a low income
+
+```{r}
+hist(data$age, 
+     main = "Histogram of age of customers", 
+     xlab = "age of customers", col = "orange")
+```
+Most customers range between the ages of 25 to 40 
+
+```{r}
+hist(data$card_debt, 
+     main = "Histogram of card debt", 
+     xlab = "card debt", col = "orange")
+```
+Most customers have a low card debt of 0 to 2
+
+```{r}
+hist(data$other_debt, 
+     main = "Histogram of other debt", 
+     xlab = "other debt", col = "orange")
+```
+Most customers have a low other debt of 0 to 2
+
+## Bivariate
+
+```{r}
+plot(income ~ age, data = data, 
+      col = "orange",
+      main = "income vs age Scatter Plot")
+```
+there is a positive correlation between age and income, as age increases so does income
+
+
+
+```{r}
+plot( card_debt~ income, data = data, 
+      col = "orange",
+      main = "card_debt vs income Scatter Plot")
+```
+customers with a low income have a low card debt
+
+```{r}
+plot( other_debt~ income, data = data, 
+      col = "orange",
+      main = "other_debt vs income Scatter Plot")
+```
+```{r}
+plot( income ~ years_employed, data = data, 
+      col = "orange",
+      main = "years employed vs income Scatter Plot")
+```
+
+as a customer works more years,their income increases 
+
+
+
+
+
+```{r}
+# Calculate the correlations
+corr <- cor(num [,-c(7)])
+corr
+
+corrplot(corr, method="circle")
+```
+
+# 6 Implement the Solution
+
+
+```{r}
+# removing columns that are not important in clustering, 
+clusterdata<-data[, -c(1,9)]
+head(clusterdata)
+
+```
+```{r}
+# Previewing the clusterdata
+
+head(clusterdata)
+```
+
+
+```{r}
+# Normalizing the dataset so that no particular attribute 
+# has more impact on clustering algorithm than others.
+
+
+normalize <- function(x){
+  return ((x-min(x)) / (max(x)-min(x)))
+}
+```
+
+```{r}
+dfnormalized <- as.data.frame(apply(clusterdata, 2, function(x) (x - min(x))/(max(x)-min(x))))
+```
+
+```{r}
+head(dfnormalized)
+```
+```{r}
+dfnormalized.pca <- prcomp(dfnormalized, center = TRUE)
+summary(dfnormalized.pca)
+```
+```{r}
+str(dfnormalized.pca)
+```
+```{r}
+plot(dfnormalized.pca,type="l")
+```
+```{r}
+fviz_eig(dfnormalized.pca)
+```
+```{r}
+fviz_pca_var(dfnormalized.pca,
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("red", "green"),
+             repel = TRUE     # Avoid text overlapping
+             )
+```
+Graph of variables contributing to PC1(on the right side of thegraph ,they include defaulted,debt income ratio,card debt,other debt and edu). 
+
+# optimization
+
+```{r}
+# Determining Optimal clusters (k) Using Elbow method
+fviz_nbclust(x = dfnormalized,FUNcluster = kmeans, method = 'wss' )
+```
+```{r}
+# Determining Optimal clusters (k) Using silhoutte method
+fviz_nbclust(x = dfnormalized,FUNcluster = kmeans, method = 'silhouette' )
+```
+```{r}
+# Determining Optimal clusters (k) Using nbclust method
+library("NbClust")
+res.nbclust <- NbClust(dfnormalized, distance = "euclidean",
+                  min.nc = 2, max.nc = 9, 
+                  method = "kmeans", index ="all")
+factoextra::fviz_nbclust(res.nbclust) + theme_minimal() + ggtitle("NbClust's optimal number of clusters")
+```
+
+
+All three  approaches suggested 2 as the number of optimal clusters, we can perform the final analysis and extract the results using 2 clusters.
+
+
+
+```{r}
+# Applying the K-means clustering algorithm with no. of centroids(k)=2
+set.seed(564)
+clusters<- kmeans(dfnormalized,2,nstart=25) 
+```
+
+
+```{r}
+
+
+# Previewing the no. of records in each cluster
+
+clusters$size 
+```
+
+```{r}
+# Getting the value of cluster center 
+# ---
+# 
+clusters$centers
+```
+
+
+
+
+```{r}
+#visualize the cluster  so far
+#
+fviz_cluster(clusters, data = dfnormalized)
+```
+
+```{r}
+# Or subset on the default 0/1
+# defaulted =1
+# not defaulted =0
+dfdefault <- subset(dfnormalized, dfnormalized$default ==1)
+dfdefault
+
+```
+```{r}
+# Or subset on the default 0/1
+# defaulted =1
+# not defaulted =0
+dfdefault <- subset(dfnormalized, dfnormalized$default ==0)
+dfdefault
+```
+
+
+```{r}
+# Clusters to which each point is associated
+clusters$cluster
+```
+
+
+# challenging the solution 
+
+```{r}
+## using hierachical clustering
+hierachydistance <- dist(dfnormalized, method = "euclidean")
+
+```
+
+```{r}
+hierachy <- hclust(hierachydistance, method = "ward.D2" )
+hierachy
+```
+
+```{r}
+# Plotting the obtained dendrogram
+ 
+plot(hierachy, cex = 0.6, hang = -1)
+```
+
+
+
+```{r}
+# Customized color for groups
+fviz_dend(hierachy,k=2,
+ k_colors = c("red", "green"))
+```
+
+
+
+```{r}
+# Cut tree into 2 groups
+grp <- cutree(hierachy,k=2)
+head(grp, n = 2)
+```
+
+```{r}
+# Number of members in each cluster
+table(grp)
+```
+
+```{r}
+# Get the names for the members of cluster 2
+rownames(dfnormalized)[grp == 2]
+```
+```{r}
+# Get the names for the members of cluster 1
+rownames(dfnormalized)[grp == 1]
+```
+# Observations
+
+Both types of clustering gave us same results so they are both reliable
+
+# Recommendation
+
+Our client should target customers in the first cluster who have not defaulted since they are likely to purchase the automobile products without payment delays as they have a great credit history
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
